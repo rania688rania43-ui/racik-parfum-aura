@@ -24,7 +24,7 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px;color:#1e3a
 <div class="tabs"><button type="button" class="tab active" id="customerTab">Racik Parfum</button><button type="button" class="tab" id="adminTab">Master / Admin</button></div>
 <section id="customer">
 <div class="card">
-<label>Kategori harga parfum</label><select id="perfumeSelect"></select>
+<label>Harga bibit parfum (/ml)</label><select id="perfumeSelect"></select>
 <label>Campuran</label><select id="mixSelect"></select>
 <label>Kapasitas racikan (ml)</label><select id="capacitySelect"></select>
 <label>Jenis pembelian / Botol</label><select id="purchaseSelect"></select>
@@ -50,9 +50,9 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px;color:#1e3a
 </div>
 </section>
 <section id="admin" class="hide">
-<div class="card" id="adminLock"><div class="adminhead">🔒 Pengaturan Master — Password</div><label>Password admin</label><input id="adminPasswordInput" type="password" placeholder="Password"><button type="button" class="btn" id="unlockAdmin">Buka Pengaturan</button><p class="note">Password awal: 1234</p></div>
+<div class="card" id="adminLock"><div class="adminhead">🔒 Pengaturan Master — Password</div><label>Password admin</label><input id="adminPasswordInput" type="password" placeholder="Masukkan password"><button type="button" class="btn" id="unlockAdmin">Buka Pengaturan</button></div>
 <div id="adminPanel" class="hide"><div class="card">
-<div class="adminhead">Master Kategori Parfum</div><div class="grid"><div><label>Nama kategori</label><input id="newPerfumeName" placeholder="Parfum 5.500"></div><div><label>Harga / ml (Rp)</label><input id="newPerfumePrice" type="number" min="0" placeholder="5500"></div><div class="full"><button type="button" class="btn" id="addPerfume">Tambah kategori</button></div></div><div id="perfumeList"></div>
+<div class="adminhead">Master Kategori Parfum</div><div class="grid"><div><label>Nama / Label</label><input id="newPerfumeName" placeholder="5.500"></div><div><label>Harga / ml (Rp)</label><input id="newPerfumePrice" type="number" min="0" placeholder="5500"></div><div class="full"><button type="button" class="btn" id="addPerfume">Tambah kategori</button></div></div><div id="perfumeList"></div>
 <div class="admin-section"><div class="adminhead">Master Campuran</div><div class="grid"><div><label>Nama campuran</label><input id="newMixName"></div><div><label>Harga / ml (Rp)</label><input id="newMixPrice" type="number" min="0"></div><div class="full"><button type="button" class="btn" id="addMix">Tambah campuran</button></div></div><div id="mixList"></div></div>
 <div class="admin-section"><div class="adminhead">Master Kapasitas Racikan (ml)</div><div class="grid"><div class="full"><label>Ukuran kapasitas (ml)</label><input id="newCapacitySize" type="number" min="1" placeholder="20"></div><div class="full"><button type="button" class="btn" id="addCapacity">Tambah kapasitas</button></div></div><div id="capacityList"></div></div>
 <div class="admin-section"><div class="adminhead">Master Jenis Pembelian / Botol</div><div class="grid"><div><label>Nama pilihan</label><input id="newPurchaseName" placeholder="Botol 20 rb"></div><div><label>Harga (Rp)</label><input id="newPurchasePrice" type="number" min="0" placeholder="20000"></div><div class="full"><button type="button" class="btn" id="addPurchase">Tambah pilihan botol</button></div></div><div id="purchaseList"></div></div>
@@ -68,7 +68,7 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px;color:#1e3a
 (function(){
 var defaultPerfumes=[];
 for(var pr=2000;pr<=5000;pr+=100){
-defaultPerfumes.push({name:"Parfum "+pr.toLocaleString("id-ID"),price:pr});
+defaultPerfumes.push({name:pr.toLocaleString("id-ID"),price:pr});
 }
 var def={
 perfumes:defaultPerfumes,
@@ -87,7 +87,7 @@ purchases:[
 rounding:1000
 };
 function clone(o){return JSON.parse(JSON.stringify(o));}
-var KEY="racikParfumV7",PASS="racikParfumPass",data=null;
+var KEY="racikParfumV8",PASS="racikParfumPass",data=null;
 try{data=JSON.parse(localStorage.getItem(KEY));}catch(e){}
 if(!data||!data.perfumes)data=clone(def);
 if(!localStorage.getItem(PASS))localStorage.setItem(PASS,"1234");
@@ -97,7 +97,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 
 function renderSelects(){
-$("perfumeSelect").innerHTML=data.perfumes.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+' — '+fmt(x.price)+'/ml</option>';}).join("");
+$("perfumeSelect").innerHTML=data.perfumes.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+'</option>';}).join("");
 $("mixSelect").innerHTML=data.mixes.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+' — '+(x.price===0?"Gratis":fmt(x.price)+"/ml")+'</option>';}).join("");
 var caps=data.capacities.map(function(x,i){return {x:x,i:i};}).sort(function(a,b){return a.x.size-b.x.size;});
 $("capacitySelect").innerHTML=caps.map(function(o){return '<option value="'+o.i+'">'+o.x.size+' ml</option>';}).join("");
@@ -134,7 +134,7 @@ return {p:p,m:m,b:b,pct:pct,vol:vol,oil:oil,sol:sol,oc:oc,mc:mc,bc:bc,fin:fin};
 
 function summary(){
 var r=calc();if(!r)return "";
-return "RACIKAN PARFUM CUSTOM\nKategori: "+r.p.name+"\nCampuran: "+r.m.name+"\nKapasitas: "+r.vol+" ml\nKemasan: "+r.b.name+"\nKualitas: "+r.pct+"%\nBibit: "+r.oil.toFixed(1)+" ml\nCampuran: "+r.sol.toFixed(1)+" ml\nTOTAL: "+fmt(r.fin);
+return "RACIKAN PARFUM CUSTOM\nHarga Bibit: "+r.p.name+"/ml\nCampuran: "+r.m.name+"\nKapasitas: "+r.vol+" ml\nKemasan: "+r.b.name+"\nKualitas: "+r.pct+"%\nBibit: "+r.oil.toFixed(1)+" ml\nCampuran: "+r.sol.toFixed(1)+" ml\nTOTAL: "+fmt(r.fin);
 }
 
 var act=null;
