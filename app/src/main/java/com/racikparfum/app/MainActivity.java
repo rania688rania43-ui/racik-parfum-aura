@@ -21,6 +21,6 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
-        webView.loadUrl("https://github.io");
+        webView.loadUrl("https://rania688rania43-ui.github.io/racik-parfum-aura/");
     }
 }
