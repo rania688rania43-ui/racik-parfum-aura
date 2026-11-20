@@ -36,7 +36,7 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}select,inpu
 <div class="row"><strong>Kualitas / Konsentrasi</strong><span class="pct" id="pctLabel">50%</span></div>
 <input type="range" min="1" max="100" step="1" value="50" id="slider">
 <div class="row small"><span style="color:#d94343">1% — 30% (Not Recommended)</span><span style="color:#167b48">31% — 100%</span></div>
-<div class="status bad" id="status">NOT RECOMMENDED</div><div class="small" style="text-align:center" id="qualityNote">Kadar di bawah rekomendasi.</div>
+<div class="status good" id="status">★ RECOMMENDED ★</div><div class="small" style="text-align:center" id="qualityNote">Kadar masuk area rekomendasi.</div>
 </div>
 
 <div class="card">
@@ -58,7 +58,6 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}select,inpu
 <div id="orderSummary" class="output hide"></div>
 </div>
 </section>
-
 <section id="admin" class="hide">
 <div class="card" id="adminLock">
 <div class="adminhead">🔒 Pengaturan Master — Password</div>
@@ -133,7 +132,6 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}select,inpu
 </section>
 </main>
 
-<!-- Modal Edit -->
 <div id="editModal" class="modal-bg hide">
 <div class="modal-box">
 <div class="adminhead" id="modalTitle">Edit Data</div>
@@ -144,46 +142,63 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px}select,inpu
 </div>
 </div>
 </div>
-
 <script>
-(()=> {
-const defaultData={
+(function(){
+var defaultData={
 perfumes:[{name:"Antonio Banderas",price:2000},{name:"Dior Sauvage",price:3000},{name:"Creed Aventus",price:5000}],
 mixes:[{name:"Etanol",price:400},{name:"Alkohol",price:0}],
 capacities:[{size:20},{size:30},{size:50},{size:100}],
 purchases:[{name:"Refill",price:0},{name:"Botol 20 ml",price:5000},{name:"Botol 30 ml",price:8000},{name:"Botol 50 ml",price:10000}],
 rounding:1000
 };
-const STORE="racikParfumCustom_v2";
-let data;try{data=JSON.parse(localStorage.getItem(STORE))||structuredClone(defaultData)}catch(e){data=structuredClone(defaultData)}
-const PASSKEY="racikParfumAdminPassword";if(!localStorage.getItem(PASSKEY))localStorage.setItem(PASSKEY,"1234");
-const $=id=>document.getElementById(id), fmt=n=>"Rp"+Math.round(n).toLocaleString("id-ID");
-function save(){localStorage.setItem(STORE,JSON.stringify(data))}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"'"}[c]))}
-function roundUp(n){let step=Math.max(1,+data.rounding||1000);return Math.ceil(n/step)*step}
+function cloneObj(o){return JSON.parse(JSON.stringify(o));}
+var STORE="racikParfumCustom_v5";
+var data;
+try{
+var saved=localStorage.getItem(STORE);
+data=saved?JSON.parse(saved):cloneObj(defaultData);
+}catch(e){data=cloneObj(defaultData);}
+if(!data||!data.perfumes)data=cloneObj(defaultData);
+
+var PASSKEY="racikParfumAdminPassword";
+if(!localStorage.getItem(PASSKEY))localStorage.setItem(PASSKEY,"1234");
+function $(id){return document.getElementById(id);}
+function fmt(n){return "Rp"+Math.round(n).toLocaleString("id-ID");}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(data));}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function roundUp(n){var step=Math.max(1,+data.rounding||1000);return Math.ceil(n/step)*step;}
 
 function renderSelects(){
-Gunakan kode dengan hati-hati.
-$("perfumeSelect").innerHTML=data.perfumes.map((x,i)=><option value="${i}">${esc(x.name)} — ${fmt(x.price)}/ml</option>).join("")||'Belum ada parfum';
-$("mixSelect").innerHTML=data.mixes.map((x,i)=><option value="${i}">${esc(x.name)} — ${x.price===0?"Gratis":fmt(x.price)+"/ml"}</option>).join("")||'Belum ada campuran';
-$("capacitySelect").innerHTML=data.capacities.map((x,i)=>({x,i})).sort((a,b)=>a.x.size-b.x.size).map(({x,i})=><option value="${i}">${x.size} ml</option>).join("")||'Belum ada kapasitas';
-$("purchaseSelect").innerHTML=data.purchases.map((x,i)=><option value="${i}">${esc(x.name)}${x.price>0?" — "+fmt(x.price):" (Gratis)"}</option>).join("")||'Belum ada pilihan';
+$("perfumeSelect").innerHTML=data.perfumes.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+' — '+fmt(x.price)+'/ml</option>';}).join("")||'<option value="">Belum ada parfum</option>';
+$("mixSelect").innerHTML=data.mixes.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+' — '+(x.price===0?"Gratis":fmt(x.price)+"/ml")+'</option>';}).join("")||'<option value="">Belum ada campuran</option>';
+var sortedCaps=data.capacities.map(function(x,i){return {x:x,i:i};}).sort(function(a,b){return a.x.size-b.x.size;});
+$("capacitySelect").innerHTML=sortedCaps.map(function(o){return '<option value="'+o.i+'">'+o.x.size+' ml</option>';}).join("")||'<option value="">Belum ada kapasitas</option>';
+$("purchaseSelect").innerHTML=data.purchases.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+(x.price>0?" — "+fmt(x.price):" (Gratis)")+'</option>';}).join("")||'<option value="">Belum ada pilihan</option>';
 }
+
 function calc(){
-if(!data.perfumes.length||!data.mixes.length||!data.capacities.length||!data.purchases.length){$("bigPrice").textContent="Data master belum lengkap";return}
-let perfume=data.perfumes[+$("perfumeSelect").value]||data.perfumes[0];
-let mix=data.mixes[+$("mixSelect").value]||data.mixes[0];
-let cap=data.capacities[+$("capacitySelect").value]||data.capacities[0];
-let purch=data.purchases[+$("purchaseSelect").value]||data.purchases[0];
-let pct=+$("slider").value;
-let volume=cap.size, oil=volumepct/100, solvent=volume-oil;
-let oilCost=oilperfume.price, mixCost=solvent*mix.price, bottleCost=purch.price;
-let raw=oilCost+mixCost+bottleCost, final=roundUp(raw);
+if(!data.perfumes.length||!data.mixes.length||!data.capacities.length||!data.purchases.length){$("bigPrice").textContent="Data master belum lengkap";return null;}
+var pIdx=+$("perfumeSelect").value||0;
+var mIdx=+$("mixSelect").value||0;
+var cIdx=+$("capacitySelect").value||0;
+var bIdx=+$("purchaseSelect").value||0;
+
+var perfume=data.perfumes[pIdx]||data.perfumes[0];
+var mix=data.mixes[mIdx]||data.mixes[0];
+var cap=data.capacities[cIdx]||data.capacities[0];
+var purch=data.purchases[bIdx]||data.purchases[0];
+var pct=+$("slider").value;
+
+var volume=cap.size, oil=volume*pct/100, solvent=volume-oil;
+var oilCost=oil*perfume.price, mixCost=solvent*mix.price, bottleCost=purch.price;
+var raw=oilCost+mixCost+bottleCost, final=roundUp(raw);
+
 $("pctLabel").textContent=pct+"%";
 $("status").textContent=pct<=30?"NOT RECOMMENDED":"★ RECOMMENDED ★";
 $("status").className="status "+(pct<=30?"bad":"good");
 $("qualityNote").textContent=pct<=30?"Kadar di bawah rekomendasi.":"Kadar masuk area rekomendasi.";
 $("slider").style.accentColor=pct<=30?"#d94343":"#167b48";
+
 $("bibitCost").textContent=fmt(oilCost);
 $("mixLineName").textContent=mix.name+" ("+solvent.toFixed(1)+" ml)";
 $("mixCost").textContent=fmt(mixCost);
@@ -192,48 +207,58 @@ $("bottleCost").textContent=fmt(bottleCost);
 $("roundedTotal").textContent=fmt(final);
 $("bigPrice").textContent=fmt(final);
 $("volumeInfo").textContent=volume+" ml • "+oil.toFixed(1)+" ml bibit • "+solvent.toFixed(1)+" ml "+mix.name;
-return {perfume,mix,cap,purch,pct,volume,oil,solvent,oilCost,mixCost,bottleCost,raw,final};
+return {perfume:perfume,mix:mix,cap:cap,purch:purch,pct:pct,volume:volume,oil:oil,solvent:solvent,oilCost:oilCost,mixCost:mixCost,bottleCost:bottleCost,raw:raw,final:final};
 }
+
 function summary(){
-let c=calc();if(!c)return "";
-return RACIKAN PARFUM CUSTOM\nParfum: ${c.perfume.name}\nCampuran: ${c.mix.name}\nKapasitas: ${c.volume} ml\nKemasan: ${c.purch.name}\nKualitas: ${c.pct}%\nBibit: ${c.oil.toFixed(1)} ml\nCampuran: ${c.solvent.toFixed(1)} ml\nHarga bibit: ${fmt(c.oilCost)}\nHarga campuran: ${fmt(c.mixCost)}\nBiaya kemasan: ${fmt(c.bottleCost)}\nTOTAL: ${fmt(c.final)};
+var c=calc();if(!c)return "";
+return "RACIKAN PARFUM CUSTOM\nParfum: "+c.perfume.name+"\nCampuran: "+c.mix.name+"\nKapasitas: "+c.volume+" ml\nKemasan: "+c.purch.name+"\nKualitas: "+c.pct+"%\nBibit: "+c.oil.toFixed(1)+" ml\nCampuran: "+c.solvent.toFixed(1)+" ml\nHarga bibit: "+fmt(c.oilCost)+"\nHarga campuran: "+fmt(c.mixCost)+"\nBiaya kemasan: "+fmt(c.bottleCost)+"\nTOTAL: "+fmt(c.final);
 }
-let editAction=null;
+
+var editAction=null;
 function openEditModal(title,fieldsHtml,onSave){
 $("modalTitle").textContent=title;
 $("modalFields").innerHTML=fieldsHtml;
 $("editModal").classList.remove("hide");
 editAction=onSave;
 }
-$("modalCancel").onclick=()=>{$("editModal").classList.add("hide");editAction=null};
-$("modalSave").onclick=()=>{if(editAction)editAction();$("editModal").classList.add("hide");editAction=null};
+$("modalCancel").onclick=function(){$("editModal").classList.add("hide");editAction=null;};
+$("modalSave").onclick=function(){if(editAction)editAction();$("editModal").classList.add("hide");editAction=null;};
+
 function listRender(kind,id){
-let arr=data[kind], el=$(id);
-el.innerHTML=arr.map((x,i)=>{
-let title=kind==="capacities"?x.size+" ml":esc(x.name);
-let sub=kind==="capacities"?"Patokan volume racikan":fmt(x.price)+(kind==="perfumes"||kind==="mixes"?"/ml":"");
-return <div class="item"><div class="row"><div><strong>${title}</strong><div class="small">${sub}</div></div><div class="item-actions"><button type="button" data-edit="${kind},${i}">Edit</button><button type="button" data-del="${kind},${i}" style="background:#fde8e8;color:#b91c1c">Hapus</button></div></div></div>;
-}).join("")||'Belum ada data.';
-el.querySelectorAll("[data-edit]").forEach(btn=>btn.onclick=()=>{
-let [k,idx]=btn.dataset.edit.split(",");idx=+idx;let item=data[k][idx];
+var arr=data[kind], el=$(id);
+el.innerHTML=arr.map(function(x,i){
+var title=kind==="capacities"?x.size+" ml":esc(x.name);
+var sub=kind==="capacities"?"Patokan volume racikan":fmt(x.price)+(kind==="perfumes"||kind==="mixes"?"/ml":"");
+return '<div class="item"><div class="row"><div><strong>'+title+'</strong><div class="small">'+sub+'</div></div><div class="item-actions"><button type="button" data-edit="'+kind+','+i+'">Edit</button><button type="button" data-del="'+kind+','+i+'" style="background:#fde8e8;color:#b91c1c">Hapus</button></div></div></div>';
+}).join("")||'<p class="note">Belum ada data.</p>';
+
+el.querySelectorAll("[data-edit]").forEach(function(btn){
+btn.onclick=function(){
+var parts=btn.dataset.edit.split(","),k=parts[0],idx=+parts[1],item=data[k][idx];
 if(k==="capacities"){
-openEditModal("Edit Kapasitas (ml)",<label>Ukuran kapasitas (ml)</label><input id="mSize" type="number" min="1" value="${item.size}">,()=>{
-let s=+$("mSize").value;if(s>0){data[k][idx]={size:s};save();renderAll()}
+openEditModal("Edit Kapasitas (ml)",'<label>Ukuran kapasitas (ml)</label><input id="mSize" type="number" min="1" value="'+item.size+'">',function(){
+var s=+$("mSize").value;if(s>0){data[k][idx]={size:s};save();renderAll();}
 });
 }else{
-let priceLabel=k==="purchases"?"Harga (Rp)":"Harga per ml (Rp)";
-openEditModal("Edit Data",<label>Nama</label><input id="mName" value="${esc(item.name)}"><label>${priceLabel}</label><input id="mPrice" type="number" min="0" value="${item.price}">,()=>{
-let n=$("mName").value.trim(),p=+$("mPrice").value;if(n&&p>=0){data[k][idx]={name:n,price:p};save();renderAll()}
+var priceLabel=k==="purchases"?"Harga (Rp)":"Harga per ml (Rp)";
+openEditModal("Edit Data",'<label>Nama</label><input id="mName" value="'+esc(item.name)+'"><label>'+priceLabel+'</label><input id="mPrice" type="number" min="0" value="'+item.price+'">',function(){
+var n=$("mName").value.trim(),p=+$("mPrice").value;if(n&&p>=0){data[k][idx]={name:n,price:p};save();renderAll();}
 });
 }
+};
 });
-el.querySelectorAll("[data-del]").forEach(btn=>btn.onclick=()=>{
-let [k,idx]=btn.dataset.del.split(",");idx=+idx;
-openEditModal("Konfirmasi Hapus",<p class="note" style="font-size:14px;color:#222">Yakin ingin menghapus data ini?</p>,()=>{
+
+el.querySelectorAll("[data-del]").forEach(function(btn){
+btn.onclick=function(){
+var parts=btn.dataset.del.split(","),k=parts[0],idx=+parts[1];
+openEditModal("Konfirmasi Hapus",'<p class="note" style="font-size:14px;color:#222">Yakin ingin menghapus data ini?</p>',function(){
 data[k].splice(idx,1);save();renderAll();
 });
+};
 });
 }
+
 function renderAll(){
 renderSelects();
 listRender("perfumes","perfumeList");
@@ -243,20 +268,24 @@ listRender("purchases","purchaseList");
 $("rounding").value=data.rounding;
 calc();
 }
-$("customerTab").onclick=()=>{$("customer").classList.remove("hide");$("admin").classList.add("hide");$("customerTab").classList.add("active");$("adminTab").classList.remove("active")};
-$("adminTab").onclick=()=>{$("admin").classList.remove("hide");$("customer").classList.add("hide");$("adminTab").classList.add("active");$("customerTab").classList.remove("active")};
-$("addPerfume").onclick=()=>{let name=$("newPerfumeName").value.trim(),price=+$("newPerfumePrice").value;if(!name||price<0||$("newPerfumePrice").value==="")return;data.perfumes.push({name,price});$("newPerfumeName").value="";$("newPerfumePrice").value="";save();renderAll()};
-$("addMix").onclick=()=>{let name=$("newMixName").value.trim(),price=+$("newMixPrice").value;if(!name||price<0||$("newMixPrice").value==="")return;data.mixes.push({name,price});$("newMixName").value="";$("newMixPrice").value="";save();renderAll()};
-$("addCapacity").onclick=()=>{let size=+$("newCapacitySize").value;if(size<=0)return;data.capacities.push({size});$("newCapacitySize").value="";save();renderAll()};
-$("addPurchase").onclick=()=>{let name=$("newPurchaseName").value.trim(),price=+$("newPurchasePrice").value;if(!name||price<0||$("newPurchasePrice").value==="")return;data.purchases.push({name,price});$("newPurchaseName").value="";$("newPurchasePrice").value="";save();renderAll()};
-$("rounding").onchange=()=>{data.rounding=Math.max(1,+$("rounding").value||1000);save();calc()};
-["perfumeSelect","mixSelect","capacitySelect","purchaseSelect","slider"].forEach(id=>$(id).addEventListener("input",calc));
-$("copyBtn").onclick=()=>{$("orderSummary").classList.remove("hide");$("orderSummary").textContent=summary();navigator.clipboard?.writeText(summary()).catch(()=>{})};
-$("orderBtn").onclick=()=>{let txt=summary(),num=$("waNumber").value.replace(/\D/g,"");if(!num){$("orderSummary").classList.remove("hide");$("orderSummary").textContent=txt+"\n\nIsi nomor WhatsApp toko untuk membuka WhatsApp.";return}window.open("https://wa.me/"+num+"?text="+encodeURIComponent(txt),"_blank")};
-$("exportBtn").onclick=()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="backup-master-parfum.json";a.click();URL.revokeObjectURL(url)};
-$("importBtn").onclick=()=>{try{let imported=JSON.parse($("importData").value);if(!imported.perfumes||!imported.mixes)throw Error("Format tidak cocok");data=imported;save();renderAll()}catch(e){}};
-$("resetBtn").onclick=()=>{openEditModal("Reset Data",<p class="note" style="font-size:14px;color:#222">Kembalikan semua master ke data contoh awal?</p>,()=>{data=structuredClone(defaultData);save();renderAll()})};
-$("unlockAdmin").onclick=()=>{if($("adminPasswordInput").value===localStorage.getItem(PASSKEY)){$("adminLock").classList.add("hide");$("adminPanel").classList.remove("hide");$("adminPasswordInput").value=""}};
-$("changePassBtn").onclick=()=>{let n=$("newAdminPass").value.trim();if(n.length>=4){localStorage.setItem(PASSKEY,n);$("newAdminPass").value=""}};
-renderAll();
-})();
+
+$("customerTab").onclick=function(){$("customer").classList.remove("hide");$("admin").classList.add("hide");$("customerTab").classList.add("active");$("adminTab").classList.remove("active");};
+$("adminTab").onclick=function(){$("admin").classList.remove("hide");$("customer").classList.add("hide");$("adminTab").classList.add("active");$("customerTab").classList.remove("active");};
+
+$("addPerfume").onclick=function(){var name=$("newPerfumeName").value.trim(),price=+$("newPerfumePrice").value;if(!name||price<0||$("newPerfumePrice").value==="")return;data.perfumes.push({name:name,price:price});$("newPerfumeName").value="";$("newPerfumePrice").value="";save();renderAll();};
+$("addMix").onclick=function(){var name=$("newMixName").value.trim(),price=+$("newMixPrice").value;if(!name||price<0||$("newMixPrice").value==="")return;data.mixes.push({name:name,price:price});$("newMixName").value="";$("newMixPrice").value="";save();renderAll();};
+$("addCapacity").onclick=function(){var size=+$("newCapacitySize").value;if(size<=0)return;data.capacities.push({size:size});$("newCapacitySize").value="";save();renderAll();};
+$("addPurchase").onclick=function(){var name=$("newPurchaseName").value.trim(),price=+$("newPurchasePrice").value;if(!name||price<0||$("newPurchasePrice").value==="")return;data.purchases.push({name:name,price:price});$("newPurchaseName").value="";$("newPurchasePrice").value="";save();renderAll();};
+
+$("rounding").onchange=function(){data.rounding=Math.max(1,+$("rounding").value||1000);save();calc();};
+["perfumeSelect","mixSelect","capacitySelect","purchaseSelect"].forEach(function(id){$(id).addEventListener("change",calc);});
+$("slider").addEventListener("input",calc);
+$("slider").addEventListener("change",calc);
+
+$("copyBtn").onclick=function(){$("orderSummary").classList.remove("hide");$("orderSummary").textContent=summary();if(navigator.clipboard)navigator.clipboard.writeText(summary()).catch(function(){});};
+$("orderBtn").onclick=function(){var txt=summary(),num=$("waNumber").value.replace(/\D/g,"");if(!num){$("orderSummary").classList.remove("hide");$("orderSummary").textContent=txt+"\n\nIsi nomor WhatsApp toko untuk membuka WhatsApp.";return;}window.open("https://wa.me"+num+"?text="+encodeURIComponent(txt),"_blank");};
+$("exportBtn").onclick=function(){var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="backup-master-parfum.json";a.click();URL.revokeObjectURL(url);};
+$("importBtn").onclick=function(){try{var imported=JSON.parse($("importData").value);if(!imported.perfumes||!imported.mixes)throw Error("Format tidak cocok");data=imported;save();renderAll();}catch(e){}};
+$("resetBtn").onclick=function(){openEditModal("Reset Data",'<p class="note" style="font-size:14px;color:#222">Kembalikan semua master ke data contoh awal?</p>',function(){data=cloneObj(defaultData);save();renderAll();});};
+$("unlockAdmin").onclick=function(){if($("adminPasswordInput").value===localStorage.getItem(PASSKEY)){$("adminLock").classList.add("hide");$("adminPanel").classList.remove("hide");$("adminPasswordInput").value="";}};
+  
