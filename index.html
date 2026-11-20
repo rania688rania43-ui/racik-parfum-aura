@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Racik Parfum Custom</title>
+<style>
+:root{--bg:#f0f7ff;--card:#fff;--text:#1e293b;--muted:#64748b;--blue:#0d6efd;--green:#16a34a;--red:#dc2626;--line:#cfe2f7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:560px;margin:auto;padding:16px 14px 30px}.hero{text-align:center;padding:14px 6px 10px}.hero h1{margin:0;font-size:24px;color:var(--blue)}.hero p{margin:5px 0;color:var(--muted);font-size:13px}
+.tabs{display:flex;gap:8px;margin:10px 0 14px}.tab{flex:1;border:1px solid var(--line);border-radius:12px;padding:11px;background:var(--card);font-weight:700;color:var(--text)}.tab.active{background:linear-gradient(135deg,#e0f2fe,#dcfce7);border-color:#7dd3fc;color:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;margin:12px 0;box-shadow:0 2px 8px #0d6efd0a}
+label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px;color:#1e3a8a}select,input,textarea{font:inherit;width:100%;padding:11px;border:1px solid #bfdbfe;border-radius:10px;background:#fff;color:#1e293b}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.small{font-size:12px;color:var(--muted)}.pct{font-size:25px;font-weight:800;color:var(--blue)}.status{text-align:center;font-weight:800;margin:9px 0 4px}.status.bad{color:var(--red)}.status.good{color:var(--green)}
+.line{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:14px}.line.total{border-top:1px solid var(--line);margin-top:5px;padding-top:12px;font-weight:800;color:var(--blue)}
+.price{text-align:center;font-size:32px;font-weight:900;margin:3px 0;color:var(--blue)}.btn{border:0;background:linear-gradient(135deg,var(--blue),var(--green));color:#fff;border-radius:11px;padding:12px 14px;font-weight:750;width:100%;cursor:pointer;margin-top:8px}.btn.secondary{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}.btn.danger{background:#dc2626}.hide{display:none!important}
+.admin-section{border-top:1px solid var(--line);padding-top:12px;margin-top:14px}.item{border:1px solid var(--line);border-radius:11px;padding:10px;margin:8px 0;background:#f8fafc}.item-actions{display:flex;gap:6px}.item-actions button{border:0;border-radius:8px;padding:7px 11px;background:#dbeafe;color:#1d4ed8;font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid .full{grid-column:1/-1}.note{font-size:12px;color:var(--muted);line-height:1.5}.output{white-space:pre-wrap;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;margin-top:10px;font-size:13px}.adminhead{font-weight:800;margin:2px 0 8px;color:var(--blue)}
+.modal-bg{position:fixed;inset:0;background:#0f172a66;display:flex;align-items:center;justify-content:center;padding:16px;z-index:99}.modal-box{background:#fff;border-radius:16px;padding:18px;width:100%;max-width:400px;border:1px solid var(--line)}
+.sc-wrap{position:relative;height:44px;display:flex;align-items:center;margin:8px 0;user-select:none;-webkit-user-select:none}
+.sc-track{width:100%;height:10px;background:#dbeafe;border-radius:99px;position:relative;box-shadow:inset 0 1px 3px #00000022}
+.sc-fill{height:100%;background:var(--green);border-radius:99px;width:50%}
+.sc-knob{position:absolute;top:50%;left:50%;width:34px;height:34px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffffff,#cbd5e1 65%,#94a3b8);border:3px solid var(--green);box-shadow:0 3px 8px #0f172a44,inset 0 1px 2px #fff;touch-action:none;cursor:grab;display:flex;align-items:center;justify-content:center}
+.sc-knob::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--green)}
+</style>
+</head>
+<body><main class="wrap">
+<div class="hero"><h1>✨ RACIK PARFUM ✨</h1><p>Racik sesuai selera · Harga otomatis</p></div>
+<div class="tabs"><button type="button" class="tab active" id="customerTab">Racik Parfum</button><button type="button" class="tab" id="adminTab">Master / Admin</button></div>
+<section id="customer">
+<div class="card">
+<label>Harga bibit parfum (/ml)</label><select id="perfumeSelect"></select>
+<label>Campuran</label><select id="mixSelect"></select>
+<label>Kapasitas racikan (ml)</label><select id="capacitySelect"></select>
+<label>Jenis pembelian / Botol</label><select id="purchaseSelect"></select>
+</div>
+<div class="card">
+<div class="row"><strong>Kualitas / Konsentrasi</strong><span class="pct" id="pctLabel">50%</span></div>
+<div class="sc-wrap" id="scWrap"><div class="sc-track"><div class="sc-fill" id="scFill"></div><div class="sc-knob" id="scKnob"></div></div></div>
+<div class="row small"><span style="color:#dc2626">1% — 30% (Not Recommended)</span><span style="color:#16a34a">31% — 100%</span></div>
+<div class="status good" id="status">★ RECOMMENDED ★</div><div class="small" style="text-align:center" id="qualityNote">Kadar masuk area rekomendasi.</div>
+</div>
+<div class="card">
+<div class="line"><span id="bibitLineName">Bibit parfum</span><strong id="bibitCost">Rp0</strong></div>
+<div class="line"><span id="mixLineName">Campuran</span><strong id="mixCost">Rp0</strong></div>
+<div class="line"><span id="purchaseLineName">Botol / Kemasan</span><strong id="bottleCost">Rp0</strong></div>
+<div class="line total"><span>Total bahan (dibulatkan)</span><strong id="roundedTotal">Rp0</strong></div>
+</div>
+<div class="card">
+<div class="small" style="text-align:center">HARGA RACIKAN</div><div class="price" id="bigPrice">Rp0</div><div class="small" style="text-align:center" id="volumeInfo">—</div>
+<label>Nomor WhatsApp toko (opsional)</label><input id="waNumber" placeholder="Contoh: 62812xxxxxxx" inputmode="tel">
+<button type="button" class="btn" id="orderBtn">Buat Pesanan WhatsApp</button>
+<button type="button" class="btn secondary" id="copyBtn">Salin Ringkasan</button>
+<div id="orderSummary" class="output hide"></div>
+</div>
+</section>
+<section id="admin" class="hide">
+<div class="card" id="adminLock"><div class="adminhead">🔒 Pengaturan Master — Password</div><label>Password admin</label><input id="adminPasswordInput" type="password" placeholder="Masukkan password"><button type="button" class="btn" id="unlockAdmin">Buka Pengaturan</button></div>
+<div id="adminPanel" class="hide"><div class="card">
+<div class="adminhead">Master Kategori Parfum</div><div class="grid"><div><label>Nama / Label</label><input id="newPerfumeName" placeholder="5.500"></div><div><label>Harga / ml (Rp)</label><input id="newPerfumePrice" type="number" min="0" placeholder="5500"></div><div class="full"><button type="button" class="btn" id="addPerfume">Tambah kategori</button></div></div><div id="perfumeList"></div>
+<div class="admin-section"><div class="adminhead">Master Campuran</div><div class="grid"><div><label>Nama campuran</label><input id="newMixName"></div><div><label>Harga / ml (Rp)</label><input id="newMixPrice" type="number" min="0"></div><div class="full"><button type="button" class="btn" id="addMix">Tambah campuran</button></div></div><div id="mixList"></div></div>
+<div class="admin-section"><div class="adminhead">Master Kapasitas Racikan (ml)</div><div class="grid"><div class="full"><label>Ukuran kapasitas (ml)</label><input id="newCapacitySize" type="number" min="1" placeholder="20"></div><div class="full"><button type="button" class="btn" id="addCapacity">Tambah kapasitas</button></div></div><div id="capacityList"></div></div>
+<div class="admin-section"><div class="adminhead">Master Jenis Pembelian / Botol</div><div class="grid"><div><label>Nama pilihan</label><input id="newPurchaseName" placeholder="Botol 20 rb"></div><div><label>Harga (Rp)</label><input id="newPurchasePrice" type="number" min="0" placeholder="20000"></div><div class="full"><button type="button" class="btn" id="addPurchase">Tambah pilihan botol</button></div></div><div id="purchaseList"></div></div>
+<div class="admin-section"><div class="adminhead">Pembulatan Harga (Rp)</div><input id="rounding" type="number" min="1" step="500" value="1000"></div>
+<div class="admin-section"><div class="adminhead">Ganti Password</div><input id="newAdminPass" type="password" placeholder="Minimal 4 karakter"><button type="button" class="btn secondary" id="changePassBtn">Simpan Password</button></div>
+<div class="admin-section"><button type="button" class="btn danger" id="resetBtn">Kembalikan data bawaan</button></div>
+</div></div>
+</section>
+</main>
+<div id="editModal" class="modal-bg hide"><div class="modal-box"><div class="adminhead" id="modalTitle">Edit Data</div><div id="modalFields"></div><div class="grid" style="margin-top:12px"><button type="button" class="btn secondary" id="modalCancel" style="margin:0">Batal</button><button type="button" class="btn" id="modalSave" style="margin:0">Simpan</button></div></div></div>
+<script>
+(function(){
+var defaultPerfumes=[];
+for(var pr=2000;pr<=5000;pr+=100){
+defaultPerfumes.push({name:pr.toLocaleString("id-ID"),price:pr});
+}
+var def={
+perfumes:defaultPerfumes,
+mixes:[
+{name:"Ethanol Jerman",price:400},
+{name:"Ethanol Lokal",price:200},
+{name:"Alkohol",price:0}
+],
+capacities:[{size:10},{size:15},{size:20},{size:25},{size:30},{size:35},{size:50},{size:60},{size:100}],
+purchases:[
+{name:"Refill",price:0},
+{name:"Botol 5 rb",price:5000},
+{name:"Botol 10 rb",price:10000},
+{name:"Botol 15 rb",price:15000}
+],
+rounding:1000
+};
+function clone(o){return JSON.parse(JSON.stringify(o));}
+var KEY="racikParfumV9",PASS="racikParfumPass",data=null,currentPct=50;
+try{data=JSON.parse(localStorage.getItem(KEY));}catch(e){}
+if(!data||!data.perfumes)data=clone(def);
+if(!localStorage.getItem(PASS))localStorage.setItem(PASS,"1234");
+function $(id){return document.getElementById(id);}
+function fmt(n){return "Rp"+Math.round(n).toLocaleString("id-ID");}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+
+function renderSelects(){
+$("perfumeSelect").innerHTML=data.perfumes.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+'</option>';}).join("");
+$("mixSelect").innerHTML=data.mixes.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+' — '+(x.price===0?"Gratis":fmt(x.price)+"/ml")+'</option>';}).join("");
+var caps=data.capacities.map(function(x,i){return {x:x,i:i};}).sort(function(a,b){return a.x.size-b.x.size;});
+$("capacitySelect").innerHTML=caps.map(function(o){return '<option value="'+o.i+'">'+o.x.size+' ml</option>';}).join("");
+$("purchaseSelect").innerHTML=data.purchases.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+(x.price>0?" — "+fmt(x.price):" (Gratis)")+'</option>';}).join("");
+}
+
+function updateKnobUI(){
+var pos=((currentPct-1)/99)*100;
+var col=currentPct<=30?"#dc2626":"#16a34a";
+$("scKnob").style.left=pos+"%";
+$("scKnob").style.borderColor=col;
+$("scFill").style.width=pos+"%";
+$("scFill").style.background=col;
+}
+
+(function initKnob(){
+var knob=$("scKnob"),wrap=$("scWrap"),dragging=false;
+function move(clientX){
+var rect=wrap.getBoundingClientRect();
+var ratio=(clientX-rect.left)/rect.width;
+ratio=Math.max(0,Math.min(1,ratio));
+currentPct=Math.round(1+ratio*99);
+updateKnobUI();
+calc();
+}
+knob.addEventListener("pointerdown",function(e){
+e.stopPropagation();
+dragging=true;
+if(knob.setPointerCapture)knob.setPointerCapture(e.pointerId);
+});
+knob.addEventListener("pointermove",function(e){
+if(!dragging)return;
+move(e.clientX);
+});
+knob.addEventListener("pointerup",function(){dragging=false;});
+knob.addEventListener("pointercancel",function(){dragging=false;});
+})();
+
+function calc(){
+if(!data.perfumes.length||!data.mixes.length||!data.capacities.length||!data.purchases.length){$("bigPrice").textContent="Master belum lengkap";return null;}
+var p=data.perfumes[+$("perfumeSelect").value||0];
+var m=data.mixes[+$("mixSelect").value||0];
+var c=data.capacities[+$("capacitySelect").value||0];
+var b=data.purchases[+$("purchaseSelect").value||0];
+var pct=currentPct;
+var vol=c.size,oil=vol*pct/100,sol=vol-oil;
+var oc=oil*p.price,mc=sol*m.price,bc=b.price;
+var step=Math.max(1,+data.rounding||1000),fin=Math.ceil((oc+mc+bc)/step)*step;
+
+$("pctLabel").textContent=pct+"%";
+$("status").textContent=pct<=30?"NOT RECOMMENDED":"★ RECOMMENDED ★";
+$("status").className="status "+(pct<=30?"bad":"good");
+$("qualityNote").textContent=pct<=30?"Kadar di bawah rekomendasi.":"Kadar masuk area rekomendasi.";
+$("bibitLineName").textContent="Bibit parfum ("+oil.toFixed(1)+" ml)";
+$("bibitCost").textContent=fmt(oc);
+$("mixLineName").textContent=m.name+" ("+sol.toFixed(1)+" ml)";
+$("mixCost").textContent=fmt(mc);
+$("purchaseLineName").textContent=b.name;
+$("bottleCost").textContent=fmt(bc);
+$("roundedTotal").textContent=fmt(fin);
+$("bigPrice").textContent=fmt(fin);
+$("volumeInfo").textContent=vol+" ml • "+oil.toFixed(1)+" ml bibit • "+sol.toFixed(1)+" ml "+m.name;
+return {p:p,m:m,b:b,pct:pct,vol:vol,oil:oil,sol:sol,oc:oc,mc:mc,bc:bc,fin:fin};
+}
+
+function summary(){
+var r=calc();if(!r)return "";
+return "RACIKAN PARFUM CUSTOM\nHarga Bibit: "+r.p.name+"/ml\nCampuran: "+r.m.name+"\nKapasitas: "+r.vol+" ml\nKemasan: "+r.b.name+"\nKualitas: "+r.pct+"%\nBibit: "+r.oil.toFixed(1)+" ml\nCampuran: "+r.sol.toFixed(1)+" ml\nTOTAL: "+fmt(r.fin);
+}
+
+var act=null;
+function modal(t,h,fn){$("modalTitle").textContent=t;$("modalFields").innerHTML=h;$("editModal").classList.remove("hide");act=fn;}
+$("modalCancel").onclick=function(){$("editModal").classList.add("hide");act=null;};
+$("modalSave").onclick=function(){if(act)act();$("editModal").classList.add("hide");act=null;};
+
+function listRender(k,id){
+$(id).innerHTML=data[k].map(function(x,i){
+var t=k==="capacities"?x.size+" ml":esc(x.name);
+var s=k==="capacities"?"Patokan volume":fmt(x.price)+(k==="perfumes"||k==="mixes"?"/ml":"");
+return '<div class="item"><div class="row"><div><strong>'+t+'</strong><div class="small">'+s+'</div></div><div class="item-actions"><button type="button" onclick="window._ed(\''+k+'\','+i+')">Edit</button><button type="button" onclick="window._dl(\''+k+'\','+i+')" style="background:#fee2e2;color:#b91c1c">Hapus</button></div></div></div>';
+}).join("")||'<p class="note">Belum ada data.</p>';
+}
+
+window._ed=function(k,i){
+var item=data[k][i];
+if(k==="capacities"){
+modal("Edit Kapasitas",'<label>Ukuran (ml)</label><input id="mS" type="number" value="'+item.size+'">',function(){var v=+$("mS").value;if(v>0){data[k][i]={size:v};save();all();}});
+}else{
+modal("Edit Data",'<label>Nama</label><input id="mN" value="'+esc(item.name)+'"><label>Harga (Rp)</label><input id="mP" type="number" value="'+item.price+'">',function(){var n=$("mN").value.trim(),v=+$("mP").value;if(n&&v>=0){data[k][i]={name:n,price:v};save();all();}});
+}
+};
+window._dl=function(k,i){
+modal("Hapus Data",'<p class="note" style="font-size:14px;color:#222">Hapus item ini?</p>',function(){data[k].splice(i,1);save();all();});
+};
+
+function all(){
+renderSelects();
+listRender("perfumes","perfumeList");
+listRender("mixes","mixList");
+listRender("capacities","capacityList");
+listRender("purchases","purchaseList");
+$("rounding").value=data.rounding;
+updateKnobUI();
+calc();
+}
+
+$("customerTab").onclick=function(){$("customer").classList.remove("hide");$("admin").classList.add("hide");$("customerTab").classList.add("active");$("adminTab").classList.remove("active");};
+$("adminTab").onclick=function(){$("admin").classList.remove("hide");$("customer").classList.add("hide");$("adminTab").classList.add("active");$("customerTab").classList.remove("active");};
+$("addPerfume").onclick=function(){var n=$("newPerfumeName").value.trim(),v=+$("newPerfumePrice").value;if(!n||$("newPerfumePrice").value==="")return;data.perfumes.push({name:n,price:v});$("newPerfumeName").value="";$("newPerfumePrice").value="";save();all();};
+$("addMix").onclick=function(){var n=$("newMixName").value.trim(),v=+$("newMixPrice").value;if(!n||$("newMixPrice").value==="")return;data.mixes.push({name:n,price:v});$("newMixName").value="";$("newMixPrice").value="";save();all();};
+$("addCapacity").onclick=function(){var v=+$("newCapacitySize").value;if(v<=0)return;data.capacities.push({size:v});$("newCapacitySize").value="";save();all();};
+$("addPurchase").onclick=function(){var n=$("newPurchaseName").value.trim(),v=+$("newPurchasePrice").value;if(!n||$("newPurchasePrice").value==="")return;data.purchases.push({name:n,price:v});$("newPurchaseName").value="";$("newPurchasePrice").value="";save();all();};
+$("rounding").onchange=function(){data.rounding=Math.max(1,+$("rounding").value||1000);save();calc();};
+["perfumeSelect","mixSelect","capacitySelect","purchaseSelect"].forEach(function(id){$(id).onchange=calc;});
+$("copyBtn").onclick=function(){$("orderSummary").classList.remove("hide");$("orderSummary").textContent=summary();if(navigator.clipboard)navigator.clipboard.writeText(summary()).catch(function(){});};
+$("orderBtn").onclick=function(){var t=summary(),n=$("waNumber").value.replace(/\D/g,"");if(!n){$("orderSummary").classList.remove("hide");$("orderSummary").textContent=t+"\n\nIsi nomor WA toko dulu.";return;}window.open("https://wa.me"+n+"?text="+encodeURIComponent(t),"_blank");};
+$("resetBtn").onclick=function(){modal("Reset",'<p class="note" style="font-size:14px;color:#222">Kembalikan data bawaan?</p>',function(){data=clone(def);save();all();});};
+$("unlockAdmin").onclick=function(){if($("adminPasswordInput").value===localStorage.getItem(PASS)){$("adminLock").classList.add("hide");$("adminPanel").classList.remove("hide");$("adminPasswordInput").value="";}};
+$("changePassBtn").onclick=function(){var n=$("newAdminPass").value.trim();if(n.length>=4){localStorage.setItem(PASS,n);$("newAdminPass").value="";}};
+all();
+})();
+</script>
+</body></html>
