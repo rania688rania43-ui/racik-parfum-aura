@@ -20,8 +20,9 @@ public class MainActivity extends Activity {
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         webView.clearCache(true);
+        webView.clearHistory();
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
-        webView.loadUrl("https://rania688rania43-ui.github.io/racik-parfum-aura/");
+        webView.loadUrl("https://github.io" + System.currentTimeMillis());
     }
 }
