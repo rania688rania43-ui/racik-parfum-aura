@@ -8,22 +8,25 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         WebView webView = new WebView(this);
         setContentView(webView);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
-        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        webView.clearCache(true);
-        webView.clearHistory();
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
-        webView.loadUrl("https://github.io" + System.currentTimeMillis());
+
+        webView.loadUrl(
+            "https://rania688rania43-ui.github.io/racik-parfum-aura/"
+        );
     }
 }
 
