@@ -15,7 +15,7 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px;color:#1e3a
 .line{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:14px}.line.total{border-top:1px solid var(--line);margin-top:5px;padding-top:12px;font-weight:800;color:var(--blue)}
 .price{text-align:center;font-size:32px;font-weight:900;margin:3px 0;color:var(--blue)}.btn{border:0;background:linear-gradient(135deg,var(--blue),var(--green));color:#fff;border-radius:11px;padding:12px 14px;font-weight:750;width:100%;cursor:pointer;margin-top:8px}.btn.secondary{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}.btn.danger{background:#dc2626}.hide{display:none!important}
 .admin-section{border-top:1px solid var(--line);padding-top:12px;margin-top:14px}.item{border:1px solid var(--line);border-radius:11px;padding:10px;margin:8px 0;background:#f8fafc}.item-actions{display:flex;gap:6px}.item-actions button{border:0;border-radius:8px;padding:7px 11px;background:#dbeafe;color:#1d4ed8;font-weight:600}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid .full{grid-column:1/-1}.note{font-size:12px;color:var(--muted);line-height:1.5}.output{white-space:pre-wrap;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;margin-top:10px;font-size:13px}.adminhead{font-weight:800;margin:2px 0 8px;color:var(--blue)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid .full{grid-column:1/-1}.note{font-size:12px;color:var(--muted);line-height:1.5}.output{white-space:pre-wrap;font-family:monospace;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;margin-top:10px;font-size:12px}.adminhead{font-weight:800;margin:2px 0 8px;color:var(--blue)}
 .modal-bg{position:fixed;inset:0;background:#0f172a66;display:flex;align-items:center;justify-content:center;padding:16px;z-index:99}.modal-box{background:#fff;border-radius:16px;padding:18px;width:100%;max-width:400px;border:1px solid var(--line)}
 .sc-wrap{position:relative;height:44px;display:flex;align-items:center;margin:8px 0;user-select:none;-webkit-user-select:none}
 .sc-track{width:100%;height:10px;background:#dbeafe;border-radius:99px;position:relative;box-shadow:inset 0 1px 3px #00000022}
@@ -53,8 +53,7 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px;color:#1e3a
 </div>
 <div class="card">
 <div class="small" style="text-align:center">HARGA RACIKAN</div><div class="price" id="bigPrice">Rp0</div><div class="small" style="text-align:center" id="volumeInfo">—</div>
-<label>Nomor WhatsApp toko (opsional)</label><input id="waNumber" placeholder="Contoh: 62812xxxxxxx" inputmode="tel">
-<button type="button" class="btn" id="orderBtn">Buat Pesanan WhatsApp</button>
+<button type="button" class="btn" id="printBtn">🖨️ Cetak Struk Bluetooth (58mm)</button>
 <button type="button" class="btn secondary" id="copyBtn">Salin Ringkasan</button>
 <div id="orderSummary" class="output hide"></div>
 </div>
@@ -83,6 +82,7 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px;color:#1e3a
 <div class="line"><span id="reqMixLabel">Campuran (<strong id="reqMixPct">50%</strong>)</span><strong id="reqMixMl" style="color:var(--green);font-size:16px">0 ml</strong></div>
 <div class="line total"><span>Total Volume Jadi</span><strong id="reqTotalMl">0 ml</strong></div>
 <div class="small" id="reqNote" style="text-align:center;margin-top:8px">—</div>
+<button type="button" class="btn" id="reqPrintBtn">🖨️ Cetak Struk Bluetooth (58mm)</button>
 </div>
 </section>
 <section id="admin" class="hide">
@@ -99,7 +99,7 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px;color:#1e3a
 </section>
 </main>
 <div id="editModal" class="modal-bg hide"><div class="modal-box"><div class="adminhead" id="modalTitle">Edit Data</div><div id="modalFields"></div><div class="grid" style="margin-top:12px"><button type="button" class="btn secondary" id="modalCancel" style="margin:0">Batal</button><button type="button" class="btn" id="modalSave" style="margin:0">Simpan</button></div></div></div>
-                                        <script>
+<script>
 (function(){
 var defaultPerfumes=[];
 for(var pr=2000;pr<=5000;pr+=100){defaultPerfumes.push({name:pr.toLocaleString("id-ID"),price:pr});}
@@ -182,7 +182,7 @@ return {p:p,m:m,b:b,pct:pct,vol:vol,oil:oil,sol:sol,oc:oc,mc:mc,bc:bc,fin:fin};
 }
 
 function calcReq(){
-if(!data.perfumes.length||!data.mixes.length||!data.purchases.length)return;
+if(!data.perfumes.length||!data.mixes.length||!data.purchases.length)return null;
 var budget=Math.max(0,+$("reqBudget").value||0);
 var p=data.perfumes[+$("reqPerfumeSelect").value||0];
 var m=data.mixes[+$("reqMixSelect").value||0];
@@ -199,7 +199,7 @@ var liquidBudget=budget-b.price;
 if(liquidBudget<=0){
 $("reqBibitMl").textContent="0 ml";$("reqMixMl").textContent="0 ml";$("reqTotalMl").textContent="0 ml";
 $("reqNote").textContent="Budget belum mencukupi harga botol ("+fmt(b.price)+").";
-return;
+return null;
 }
 var avgPricePerMl=(pct/100)*p.price+(mixPct/100)*m.price;
 var totalVol=avgPricePerMl>0?liquidBudget/avgPricePerMl:0;
@@ -209,10 +209,58 @@ $("reqBibitMl").textContent=oilMl.toFixed(1)+" ml";
 $("reqMixMl").textContent=mixMl.toFixed(1)+" ml";
 $("reqTotalMl").textContent=totalVol.toFixed(1)+" ml";
 $("reqNote").textContent="Sisa dana cairan "+fmt(liquidBudget)+" (setelah potong "+b.name+" "+fmt(b.price)+")";
+return {budget:budget,p:p,m:m,b:b,pct:pct,oilMl:oilMl,mixMl:mixMl,totalVol:totalVol};
 }
-                          function summary(){
+  function receipt58(){
 var r=calc();if(!r)return "";
-return "RACIK AURA PERFUME\nHarga Bibit: "+r.p.name+"/ml\nCampuran: "+r.m.name+"\nKapasitas: "+r.vol+" ml\nKemasan: "+r.b.name+"\nKualitas: "+r.pct+"%\nBibit: "+r.oil.toFixed(1)+" ml\nCampuran: "+r.sol.toFixed(1)+" ml\nTOTAL: "+fmt(r.fin);
+var dt=new Date().toLocaleString("id-ID",{dateStyle:"short",timeStyle:"short"});
+return "================================\n"
++"       RACIK AURA PERFUME       \n"
++"    Wangi Khas Pilihanmu        \n"
++"================================\n"
++"Tgl     : "+dt+"\n"
++"Bibit   : "+r.p.name+"/ml\n"
++"Campur  : "+r.m.name+"\n"
++"Kadar   : "+r.pct+"% ("+r.vol+" ml)\n"
++"Kemasan : "+r.b.name+"\n"
++"--------------------------------\n"
++"Bibit ("+r.oil.toFixed(1)+"ml) : "+fmt(r.oc)+"\n"
++"Campur("+r.sol.toFixed(1)+"ml) : "+fmt(r.mc)+"\n"
++"Botol          : "+fmt(r.bc)+"\n"
++"================================\n"
++"TOTAL          : "+fmt(r.fin)+"\n"
++"================================\n"
++"  Terima Kasih Atas Kunjungan   \n\n\n";
+}
+
+function reqReceipt58(){
+var r=calcReq();if(!r)return "";
+var dt=new Date().toLocaleString("id-ID",{dateStyle:"short",timeStyle:"short"});
+return "================================\n"
++"       RACIK AURA PERFUME       \n"
++"      STRUK REQUEST HARGA       \n"
++"================================\n"
++"Tgl     : "+dt+"\n"
++"Bibit   : "+r.p.name+"/ml\n"
++"Campur  : "+r.m.name+"\n"
++"Kemasan : "+r.b.name+"\n"
++"Kadar   : "+r.pct+"%\n"
++"--------------------------------\n"
++"Bibit   : "+r.oilMl.toFixed(1)+" ml\n"
++"Campur  : "+r.mixMl.toFixed(1)+" ml\n"
++"Total   : "+r.totalVol.toFixed(1)+" ml\n"
++"================================\n"
++"TOTAL BAYAR : "+fmt(r.budget)+"\n"
++"================================\n"
++"  Terima Kasih Atas Kunjungan   \n\n\n";
+}
+
+function printRawBT(txt){
+if(!txt)return;
+$("orderSummary").classList.remove("hide");
+$("orderSummary").textContent=txt;
+var base64=btoa(unescape(encodeURIComponent(txt)));
+window.location.href="rawbt:base64,"+base64;
 }
 
 var act=null;
@@ -270,8 +318,11 @@ $("addCapacity").onclick=function(){var v=+$("newCapacitySize").value;if(v<=0)re
 $("addPurchase").onclick=function(){var n=$("newPurchaseName").value.trim(),v=+$("newPurchasePrice").value;if(!n||$("newPurchasePrice").value==="")return;data.purchases.push({name:n,price:v});$("newPurchaseName").value="";$("newPurchasePrice").value="";save();all();};
 $("rounding").onchange=function(){data.rounding=Math.max(1,+$("rounding").value||1000);save();calc();};
 ["perfumeSelect","mixSelect","capacitySelect","purchaseSelect"].forEach(function(id){$(id).onchange=calc;});
-$("copyBtn").onclick=function(){$("orderSummary").classList.remove("hide");$("orderSummary").textContent=summary();if(navigator.clipboard)navigator.clipboard.writeText(summary()).catch(function(){});};
-$("orderBtn").onclick=function(){var t=summary(),n=$("waNumber").value.replace(/\D/g,"");if(!n){$("orderSummary").classList.remove("hide");$("orderSummary").textContent=t+"\n\nIsi nomor WA toko dulu.";return;}window.open("https://wa.me"+n+"?text="+encodeURIComponent(t),"_blank");};
+
+$("copyBtn").onclick=function(){var txt=receipt58();$("orderSummary").classList.remove("hide");$("orderSummary").textContent=txt;if(navigator.clipboard)navigator.clipboard.writeText(txt).catch(function(){});};
+$("printBtn").onclick=function(){printRawBT(receipt58());};
+$("reqPrintBtn").onclick=function(){printRawBT(reqReceipt58());};
+
 $("resetBtn").onclick=function(){modal("Reset",'<p class="note" style="font-size:14px;color:#222">Kembalikan data bawaan?</p>',function(){data=clone(def);save();all();});};
 $("unlockAdmin").onclick=function(){if($("adminPasswordInput").value===localStorage.getItem(PASS)){$("adminLock").classList.add("hide");$("adminPanel").classList.remove("hide");$("adminPasswordInput").value="";}};
 $("changePassBtn").onclick=function(){var n=$("newAdminPass").value.trim();if(n.length>=4){localStorage.setItem(PASS,n);$("newAdminPass").value="";}};
