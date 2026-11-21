@@ -99,7 +99,7 @@ label{display:block;font-size:13px;font-weight:650;margin:10px 0 5px;color:#1e3a
 </section>
 </main>
 <div id="editModal" class="modal-bg hide"><div class="modal-box"><div class="adminhead" id="modalTitle">Edit Data</div><div id="modalFields"></div><div class="grid" style="margin-top:12px"><button type="button" class="btn secondary" id="modalCancel" style="margin:0">Batal</button><button type="button" class="btn" id="modalSave" style="margin:0">Simpan</button></div></div></div>
-<script>
+                                        <script>
 (function(){
 var defaultPerfumes=[];
 for(var pr=2000;pr<=5000;pr+=100){defaultPerfumes.push({name:pr.toLocaleString("id-ID"),price:pr});}
@@ -210,8 +210,7 @@ $("reqMixMl").textContent=mixMl.toFixed(1)+" ml";
 $("reqTotalMl").textContent=totalVol.toFixed(1)+" ml";
 $("reqNote").textContent="Sisa dana cairan "+fmt(liquidBudget)+" (setelah potong "+b.name+" "+fmt(b.price)+")";
 }
-
-function summary(){
+                          function summary(){
 var r=calc();if(!r)return "";
 return "RACIK AURA PERFUME\nHarga Bibit: "+r.p.name+"/ml\nCampuran: "+r.m.name+"\nKapasitas: "+r.vol+" ml\nKemasan: "+r.b.name+"\nKualitas: "+r.pct+"%\nBibit: "+r.oil.toFixed(1)+" ml\nCampuran: "+r.sol.toFixed(1)+" ml\nTOTAL: "+fmt(r.fin);
 }
@@ -268,3 +267,15 @@ $("reqBudget").oninput=calcReq;
 $("addPerfume").onclick=function(){var n=$("newPerfumeName").value.trim(),v=+$("newPerfumePrice").value;if(!n||$("newPerfumePrice").value==="")return;data.perfumes.push({name:n,price:v});$("newPerfumeName").value="";$("newPerfumePrice").value="";save();all();};
 $("addMix").onclick=function(){var n=$("newMixName").value.trim(),v=+$("newMixPrice").value;if(!n||$("newMixPrice").value==="")return;data.mixes.push({name:n,price:v});$("newMixName").value="";$("newMixPrice").value="";save();all();};
 $("addCapacity").onclick=function(){var v=+$("newCapacitySize").value;if(v<=0)return;data.capacities.push({size:v});$("newCapacitySize").value="";save();all();};
+$("addPurchase").onclick=function(){var n=$("newPurchaseName").value.trim(),v=+$("newPurchasePrice").value;if(!n||$("newPurchasePrice").value==="")return;data.purchases.push({name:n,price:v});$("newPurchaseName").value="";$("newPurchasePrice").value="";save();all();};
+$("rounding").onchange=function(){data.rounding=Math.max(1,+$("rounding").value||1000);save();calc();};
+["perfumeSelect","mixSelect","capacitySelect","purchaseSelect"].forEach(function(id){$(id).onchange=calc;});
+$("copyBtn").onclick=function(){$("orderSummary").classList.remove("hide");$("orderSummary").textContent=summary();if(navigator.clipboard)navigator.clipboard.writeText(summary()).catch(function(){});};
+$("orderBtn").onclick=function(){var t=summary(),n=$("waNumber").value.replace(/\D/g,"");if(!n){$("orderSummary").classList.remove("hide");$("orderSummary").textContent=t+"\n\nIsi nomor WA toko dulu.";return;}window.open("https://wa.me"+n+"?text="+encodeURIComponent(t),"_blank");};
+$("resetBtn").onclick=function(){modal("Reset",'<p class="note" style="font-size:14px;color:#222">Kembalikan data bawaan?</p>',function(){data=clone(def);save();all();});};
+$("unlockAdmin").onclick=function(){if($("adminPasswordInput").value===localStorage.getItem(PASS)){$("adminLock").classList.add("hide");$("adminPanel").classList.remove("hide");$("adminPasswordInput").value="";}};
+$("changePassBtn").onclick=function(){var n=$("newAdminPass").value.trim();if(n.length>=4){localStorage.setItem(PASS,n);$("newAdminPass").value="";}};
+all();
+})();
+</script>
+</body></html>
