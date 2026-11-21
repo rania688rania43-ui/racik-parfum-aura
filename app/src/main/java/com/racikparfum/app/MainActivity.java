@@ -58,7 +58,8 @@ public class MainActivity extends Activity {
         webView.setWebChromeClient(new WebChromeClient());
 
         // Alamat web GitHub Pages aplikasi kasir parfum kamu
-        webView.loadUrl("https://github.io");
+        webView.loadUrl("https://rania688rania43-ui.github.io/racik-parfum-aura/");
+
     }
 
     // Agar tombol "Back" (Kembali) di HP tidak langsung menutup aplikasi
