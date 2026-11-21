@@ -26,3 +26,4 @@ public class MainActivity extends Activity {
         webView.loadUrl("https://github.io" + System.currentTimeMillis());
     }
 }
+
