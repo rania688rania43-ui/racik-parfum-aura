@@ -44,5 +44,4 @@ public class MainActivity extends Activity {
         webView.setWebChromeClient(new WebChromeClient());
         webView.loadUrl("https://github.io");
     }
-            }
-
+}
